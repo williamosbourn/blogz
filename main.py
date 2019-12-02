@@ -16,8 +16,11 @@ class Blog(db.Model):
     def __init__(self, title, body):
         self.title = title
         self.body = body
-        
 
+
+@app.route('/newpost', methods=['POST', 'GET'])
+def newpost():
+    return render_template('newpost.html',title="Add a Blog Entry")
 
 
 @app.route('/', methods=['POST', 'GET'])
