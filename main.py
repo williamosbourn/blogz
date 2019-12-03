@@ -18,9 +18,17 @@ class Blog(db.Model):
         self.body = body
 
 
-@app.route('/newpost', methods=['POST', 'GET'])
+@app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
-    return render_template('newpost.html',title="Add a Blog Entry")
+    if request.method == 'POST':
+        blog_title = request.form['blog_name']
+        t_error = ''
+   
+        if (not blog_title) or (blog_title.strip()==''):
+            t_error = 'Please fill in the title'
+            blog_title = ''
+        
+    return render_template('newpost.html', title="Add a Blog Entry", blog_name=blog_title, title_error=t_error)
 
 
 @app.route('/', methods=['POST', 'GET'])
