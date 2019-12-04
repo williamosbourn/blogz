@@ -27,7 +27,7 @@ def newpost():
         if (not blog_title) or (blog_title.strip()==''):
             t_error = 'Please fill in the title'
             blog_title = ''
-        
+        else:
     return render_template('newpost.html', title="Add a Blog Entry", blog_name=blog_title, title_error=t_error)
 
 
