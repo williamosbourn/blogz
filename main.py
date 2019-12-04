@@ -1,12 +1,12 @@
 from flask import Flask, request, redirect, render_template, session, flash
-from flask_sqlalchemy import SQLAlchemy 
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:password@localhost:8889/build-a-blog'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
-app.secret_key = 'y337kGcys&zP3B'
+
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,17 +36,26 @@ def newpost():
             new_post = Blog(blog_title, blog_entry)
             db.session.add(new_post)
             db.session.commit()
-            return render_template('blog.html', blog_title=blog_title, blog_entry=blog_entry)
+
+            blog_id = Blog.query.order_by(Blog.id.desc()).first().id
+            return redirect('/postblog?id={}'.format(blog_id))
     else:
         title_error = ''
         entry_error = ''
         
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, entry_error=entry_error)
 
+@app.route('/postblog')
+def postblog():
+    blog_id = request.args.get('id')  
+    post= Blog.query.filter_by(id=blog_id).first() 
+
+    return render_template('postblog.html', post=post)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    return render_template('blog.html',title="Build A Blog")
+    blog_list = Blog.query.all()
+    return render_template('blog.html',title="Build A Blog", bloglist=blog_list)
 
 
 
