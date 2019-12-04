@@ -22,13 +22,26 @@ class Blog(db.Model):
 def newpost():
     if request.method == 'POST':
         blog_title = request.form['blog_name']
-        t_error = ''
+        blog_entry = request.form['blog_entry']
+        title_error = ''
+        entry_error = ''
    
         if (not blog_title) or (blog_title.strip()==''):
-            t_error = 'Please fill in the title'
-            blog_title = ''
-        else:
-    return render_template('newpost.html', title="Add a Blog Entry", blog_name=blog_title, title_error=t_error)
+            title_error = 'Please fill in the title'
+        
+        if (not blog_entry) or (blog_entry.strip()==''):
+            entry_error = 'Please fill in the blog entry'
+        
+        if not title_error and not entry_error:
+            new_post = Blog(blog_title, blog_entry)
+            db.session.add(new_post)
+            db.session.commit()
+            return render_template('blog.html', blog_title=blog_title, blog_entry=blog_entry)
+    else:
+        title_error = ''
+        entry_error = ''
+        
+    return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, entry_error=entry_error)
 
 
 @app.route('/', methods=['POST', 'GET'])
