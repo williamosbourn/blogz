@@ -8,11 +8,15 @@
     <h1>
         <a href='/postblog?id={{blog.id}}'>{{blog.title}}</a>
     </h1>
+
     <p>{{blog.body}}</p>
-    <hr>
-{% endfor %}
 
     
+    
+    <em>Written by <a href='/usersposts?user_id={{blog.owner.id}}'>{{blog.owner.username}}</a></em>  
+    
 
+    <hr>
+{% endfor %}
     
 {% endblock %}

@@ -25,12 +25,13 @@
 <body>
 
     <nav>
-        <a href='/'>Main Blog Page</a>
-        <a href='/'>Add a Blog Entry</a>
+        <a href='index'>Home</a>
+        <a href="/">All Posts</a>
+        <a href="newpost">Create New Post</a>
 
         <div style='float: right'>
-            {% if 'email' in session %}
-              {{ session['email'] }}
+            {% if 'username' in session %}
+              {{ session['username'] }}
               <form action="/logout" method="post" id='logout'>
                 <input type="submit" value="Log Out" />
               </form>

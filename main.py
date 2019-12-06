@@ -27,28 +27,17 @@ class Blog(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
+    username = db.Column(db.String(120), unique=True)
     pw_hash = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
-
-    def __init__(self, email, password):
-        self.email = email
+# all_posts = Blog.query.filter_by(owner=user.blogs)
+    def __init__(self, username, password):
+        self.username = username
         self.pw_hash = make_pw_hash(password) 
     
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %r>' % self.username
 
-
-
-def is_email(string):
-    atsign_index = string.find('@')
-    atsign_present = atsign_index >= 0
-    if not atsign_present:
-        return False
-    else:
-        domain_dot_index = string.find('.', atsign_index)
-        domain_dot_present = domain_dot_index >= 0
-        return domain_dot_present
 
 
 
@@ -79,43 +68,49 @@ def newpost():
         
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, entry_error=entry_error)
 
+@app.route('/usersposts')
+def users_posts():
+    if request.args.get('user_id'):
+        user_id = request.args.get('user_id')
+        posts = Blog.query.filter_by(owner_id=user_id)
+    else:
+        return redirect('/')
+    return render_template('usersposts.html', posts=posts)
+
 @app.route('/postblog')
 def postblog():
     blog_id = request.args.get('id')  
-    post= Blog.query.filter_by(id=blog_id).first() 
-
+    post= Blog.query.filter_by(id=blog_id).first()
     return render_template('postblog.html', post=post)
+
 
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
         verify = request.form['verify']
-        if not is_email(email):
-            flash('OH NO! "' + email + '" does not seem like an email address')
-            return redirect('/signup')
-        email_db_count = User.query.filter_by(email=email).count()
-        if email_db_count > 0:
-            flash('yikes! "' + email + '" is already taken and password reminders are not implemented')
+    
+        u_name = User.query.filter_by(username=username).count()
+        if u_name > 0:
+            flash('This username already exists')
             return redirect('/signup')
         if password != verify:
             flash('passwords did not match')
             return redirect('/signup')
-        user = User(email=email, password=password)
+        user = User(username=username, password=password)
         db.session.add(user)
         db.session.commit()
-        session['email'] = user.email
+        session['username'] = user.username
         return redirect("/newpost")
     else:
         return render_template('signup.html')
 
 @app.route("/logout", methods=['POST'])
 def logout():
-    del session['email']
+    del session['username']
     return redirect("/")
-
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -123,41 +118,47 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     elif request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
-        user = User.query.filter_by(email=email).first()
-        if user and check_pw_hash(password, user.pw_hash):
-            session['email'] = user.email
-            flash('welcome back, '+user.email)
-            return redirect("/newpost")
+        user = User.query.filter_by(username=username)
+        if user.count() == 1:
+            user = user.first()
+            if user and check_pw_hash(password, user.pw_hash):
+                session['username'] = user.username
+                flash('welcome back, '+ user.username)
+                return redirect("/newpost")
         flash('bad username or password')
         return redirect("/login")
 
 
 
 def logged_in_user():
-    owner = User.query.filter_by(email=session['email']).first()
+    owner = User.query.filter_by(username=session['username']).first()
     return owner
 
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'signup', 'index']
-    if request.endpoint not in allowed_routes and 'email' not in session:
+    if request.endpoint not in allowed_routes and 'username' not in session:
         # return request.endpoint
-
         return redirect('/login')
 
 
 
-# @app.route('/index')
+@app.route('/index')
+def home():
+    user_list = User.query.all()
+    return render_template('index.html',title="Blog Users",user_list = user_list)
 
 
 
 
 
-@app.route('/index', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def index():
+   
     blog_list = Blog.query.all()
+    
     return render_template('blog.html',title="Build A Blog", bloglist=blog_list)
 
 
