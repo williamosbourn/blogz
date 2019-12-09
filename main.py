@@ -30,7 +30,7 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True)
     pw_hash = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
-# all_posts = Blog.query.filter_by(owner=user.blogs)
+
     def __init__(self, username, password):
         self.username = username
         self.pw_hash = make_pw_hash(password) 
@@ -70,9 +70,10 @@ def newpost():
 
 @app.route('/usersposts')
 def users_posts():
-    if request.args.get('user_id'):
-        user_id = request.args.get('user_id')
-        posts = Blog.query.filter_by(owner_id=user_id)
+    if request.args.get('user'):
+        username = request.args.get('user')
+        user = User.query.filter_by(username=username).first()
+        posts = Blog.query.filter_by(owner_id=user.id).all()
     else:
         return redirect('/')
     return render_template('usersposts.html', posts=posts)
@@ -138,28 +139,22 @@ def logged_in_user():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'index']
+    allowed_routes = ['login', 'signup', 'home']
     if request.endpoint not in allowed_routes and 'username' not in session:
         # return request.endpoint
         return redirect('/login')
 
 
 
-@app.route('/index')
+@app.route('/')
 def home():
     user_list = User.query.all()
     return render_template('index.html',title="Blog Users",user_list = user_list)
 
-
-
-
-
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/blog', methods=['POST', 'GET'])
 def index():
-   
     blog_list = Blog.query.all()
-    
-    return render_template('blog.html',title="Build A Blog", bloglist=blog_list)
+    return render_template('blog.html',title="BLOGZ", bloglist=blog_list)
 
 
 

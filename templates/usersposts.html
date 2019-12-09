@@ -4,14 +4,14 @@
 
 {% for post in posts %}
     <h1>
-        {{post.title}}</a>
+        <a href='/postblog?id={{post.id}}'>{{post.title}}</a>
     </h1>
 
     <p>{{post.body}}</p>
 
     
     
-    <em>Written by <a href='/usersposts?user_id={{post.owner.id}}'>{{post.owner.username}}</a></em>  
+    <em>Written by <a href='/usersposts?user={{post.owner.username}}'>{{post.owner.username}}</a></em>  
     
 
     <hr>
