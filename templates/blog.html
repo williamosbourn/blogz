@@ -4,7 +4,7 @@
 
 <h1 class='center_large'>{{title}}</h1>
 
-{% for blog in bloglist: %}
+{% for blog in bloglist %}
     <h1>
         <a href='/postblog?id={{blog.id}}'>{{blog.title}}</a>
     </h1>
@@ -13,7 +13,7 @@
 
     
     
-    <em>Written by <a href='/usersposts?user={{blog.owner.username}}'>{{blog.owner.username}}</a></em>  
+    <em>Written by <a href='/blog?user={{blog.owner.username}}'>{{blog.owner.username}}</a></em>  
     
 
     <hr>

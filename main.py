@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, session, flash
+from flask import Flask, request, redirect, render_template, session, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from hashutils import make_pw_hash, check_pw_hash 
 
@@ -68,15 +68,32 @@ def newpost():
         
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, entry_error=entry_error)
 
-@app.route('/usersposts')
-def users_posts():
+# @app.route('/usersposts')
+# def users_posts():
+#     if request.args.get('user'):
+#         username = request.args.get('user')
+#         user = User.query.filter_by(username=username).first()
+#         if not user:
+#             abort(403)
+#         posts = Blog.query.filter_by(owner_id=user.id).all()
+#     else:
+#         return abort(403)
+#     return render_template('blog.html', bloglist=posts)
+
+
+@app.route('/blog', methods=['POST', 'GET'])
+def index():
+    blog_list = Blog.query.all()
+
     if request.args.get('user'):
         username = request.args.get('user')
         user = User.query.filter_by(username=username).first()
-        posts = Blog.query.filter_by(owner_id=user.id).all()
-    else:
-        return redirect('/')
-    return render_template('usersposts.html', posts=posts)
+        if not user:
+            abort(403)
+        blog_list = Blog.query.filter_by(owner_id=user.id).all()
+
+    
+    return render_template('blog.html',title="BLOGZ", bloglist=blog_list)
 
 @app.route('/postblog')
 def postblog():
@@ -151,10 +168,6 @@ def home():
     user_list = User.query.all()
     return render_template('index.html',title="Blog Users",user_list = user_list)
 
-@app.route('/blog', methods=['POST', 'GET'])
-def index():
-    blog_list = Blog.query.all()
-    return render_template('blog.html',title="BLOGZ", bloglist=blog_list)
 
 
 
