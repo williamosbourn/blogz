@@ -68,18 +68,6 @@ def newpost():
         
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, entry_error=entry_error)
 
-# @app.route('/usersposts')
-# def users_posts():
-#     if request.args.get('user'):
-#         username = request.args.get('user')
-#         user = User.query.filter_by(username=username).first()
-#         if not user:
-#             abort(403)
-#         posts = Blog.query.filter_by(owner_id=user.id).all()
-#     else:
-#         return abort(403)
-#     return render_template('blog.html', bloglist=posts)
-
 
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
@@ -128,7 +116,7 @@ def signup():
 @app.route("/logout", methods=['POST'])
 def logout():
     del session['username']
-    return redirect("/")
+    return redirect("/blog")
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -149,19 +137,16 @@ def login():
         return redirect("/login")
 
 
-
 def logged_in_user():
     owner = User.query.filter_by(username=session['username']).first()
     return owner
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'home']
+    allowed_routes = ['login', 'signup', 'home', 'index']
     if request.endpoint not in allowed_routes and 'username' not in session:
         # return request.endpoint
         return redirect('/login')
-
-
 
 @app.route('/')
 def home():
